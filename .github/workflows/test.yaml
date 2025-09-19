@@ -6,51 +6,52 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: vmactions/dragonflybsd-vm@v1
-    - run: |
-        pwd
-        ls -lah
-        whoami
-        env
-        uname -a
-        env IGNORE_OSVERSION=yes pkg install -y ccache-static
-        ccache --max-size=${CCACHE_SIZE}
-        echo "WITH_CCACHE_BUILD=yes" >> /etc/make.conf
-        {
-        {
-        patch -N /usr/ports/Mk/bsd.port.subdir.mk << EOF
-        @@ -173,6 +173,11 @@
-         TARGETS+=	realinstall
-         TARGETS+=	reinstall
-         TARGETS+=	tags
-        +TARGETS+=	stage
-        +TARGETS+=	stage-qa
-        +TARGETS+=	check-plist
-        +TARGETS+=	run-depends-list
-        +TARGETS+=	build-depends-list
-        
-         .for __target in ${TARGETS}
-         .  if !target(${__target})
-        EOF
-        } || true
-        }
-        grep -n '^TARGETS+=' /usr/ports/Mk/bsd.port.subdir.mk
-        echo 'OVERLAYS=/'"$(pwd)"'/' >> /etc/make.conf
-        echo 'WITH_DEBUG=yes' >> /etc/make.conf
-        echo 'DEBUG_FLAGS+= -O0' >> /etc/make.conf
-        cat /etc/make.conf
-        make run-depends-list | sort | uniq | grep -v '^==\|xlibre' | cut -d '/' -f 4- | xargs pkg install -y
-        make build-depends-list | sort | uniq | grep -v '^==\|xlibre\|xorg-macros' | cut -d '/' -f 4- | xargs pkg install -y
-        make -C /usr/ports/devel/xorg-macros/ clean
-        make stage
-        make stage-qa
-        make check-plist
-        export PACKAGES="$(pwd)/pkgs/"
-        mkdir $PACKAGES
-        make package
-        export PACKAGES="$(pwd)/pkgs/"
-        ABI="$(pkg config abi)"
-        mv $PACKAGES/All $PACKAGES/$ABI
-        pkg repo -l $PACKAGES/$ABI
-        pkg install -y tree
-        cd $PACKAGES/$ABI 
-        tree -h -D -C -H -./ --houtro=/dev/null -T 'XLibre binaries for FreeBSD' ./ > ./index.html
+      with:
+        run: |
+          pwd
+          ls -lah
+          whoami
+          env
+          uname -a
+          env IGNORE_OSVERSION=yes pkg install -y ccache-static
+          ccache --max-size=${CCACHE_SIZE}
+          echo "WITH_CCACHE_BUILD=yes" >> /etc/make.conf
+          {
+          {
+          patch -N /usr/ports/Mk/bsd.port.subdir.mk << EOF
+          @@ -173,6 +173,11 @@
+           TARGETS+=	realinstall
+           TARGETS+=	reinstall
+           TARGETS+=	tags
+          +TARGETS+=	stage
+          +TARGETS+=	stage-qa
+          +TARGETS+=	check-plist
+          +TARGETS+=	run-depends-list
+          +TARGETS+=	build-depends-list
+          
+           .for __target in ${TARGETS}
+           .  if !target(${__target})
+          EOF
+          } || true
+          }
+          grep -n '^TARGETS+=' /usr/ports/Mk/bsd.port.subdir.mk
+          echo 'OVERLAYS=/'"$(pwd)"'/' >> /etc/make.conf
+          echo 'WITH_DEBUG=yes' >> /etc/make.conf
+          echo 'DEBUG_FLAGS+= -O0' >> /etc/make.conf
+          cat /etc/make.conf
+          make run-depends-list | sort | uniq | grep -v '^==\|xlibre' | cut -d '/' -f 4- | xargs pkg install -y
+          make build-depends-list | sort | uniq | grep -v '^==\|xlibre\|xorg-macros' | cut -d '/' -f 4- | xargs pkg install -y
+          make -C /usr/ports/devel/xorg-macros/ clean
+          make stage
+          make stage-qa
+          make check-plist
+          export PACKAGES="$(pwd)/pkgs/"
+          mkdir $PACKAGES
+          make package
+          export PACKAGES="$(pwd)/pkgs/"
+          ABI="$(pkg config abi)"
+          mv $PACKAGES/All $PACKAGES/$ABI
+          pkg repo -l $PACKAGES/$ABI
+          pkg install -y tree
+          cd $PACKAGES/$ABI 
+          tree -h -D -C -H -./ --houtro=/dev/null -T 'XLibre binaries for FreeBSD' ./ > ./index.html
