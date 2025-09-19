@@ -7,6 +7,8 @@ uname -a
 env IGNORE_OSVERSION=yes pkg install -y ccache-static
 ccache --max-size="200M"
 ls /usr/dports
+export PORTS_BRANCH="master"
+if [ ! -f "/usr/dports/${PORTS_BRANCH}" ] ; then mkdir -p /usr/dports && fetch "https://github.com/dragonflybsd/dports/archive/refs/heads/${PORTS_BRANCH}.tar.gz" -o - | tar xf - -C /usr/dports --strip-components=1 && touch "/usr/dports/${PORTS_BRANCH}" ; fi
 echo "WITH_CCACHE_BUILD=yes" >> /etc/make.conf
 {
 {
