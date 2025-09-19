@@ -1,0 +1,15 @@
+name: test
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: DragonFlyBSD build
+    steps:
+      uses: vmactions/dragonflybsd-vm@v1
+      run: |
+        pwd
+        ls -lah
+        whoami
+        env
+        uname -a
+
